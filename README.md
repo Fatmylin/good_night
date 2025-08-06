@@ -54,8 +54,9 @@ rails db:create
 rails db:migrate
 ```
 
-4. **Run the application**
+4. **Enable caching and run the application**
 ```bash
+rails dev:cache
 rails server
 ```
 
