@@ -104,11 +104,17 @@ curl -X POST http://localhost:3000/api/v1/clock_in \
 
 ### 4. Follow Another User (Authenticated)
 ```bash
-curl -X POST http://localhost:3000/api/v1/follow/2 \
+curl -X POST http://localhost:3000/api/v1/follow/:user_id \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
-### 5. Get Friends' Sleep Records (Authenticated)
+### 5. Unfollow a User (Authenticated)
+```bash
+curl -X DELETE http://localhost:3000/api/v1/follow/:user_id \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+### 6. Get Friends' Sleep Records (Authenticated)
 ```bash
 curl http://localhost:3000/api/v1/following_sleep_records \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
