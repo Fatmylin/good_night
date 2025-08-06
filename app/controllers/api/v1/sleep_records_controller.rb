@@ -51,6 +51,4 @@ class Api::V1::SleepRecordsController < ApplicationController
   rescue ActiveRecord::RecordNotFound
     render json: { error: "User not found" }, status: :not_found
   end
-
-
 end

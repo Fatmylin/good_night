@@ -39,5 +39,4 @@ class Api::V1::FollowsController < ApplicationController
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Target user not found" }, status: :not_found
   end
-
 end
