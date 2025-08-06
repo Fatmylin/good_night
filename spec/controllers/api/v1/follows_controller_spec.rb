@@ -1,9 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe Api::V1::FollowsController, type: :request do
-  let!(:alice) { User.create!(name: 'Alice Johnson') }
-  let!(:bob) { User.create!(name: 'Bob Smith') }
-  let!(:charlie) { User.create!(name: 'Charlie Brown') }
+  let!(:alice) { User.create!(name: 'Alice Johnson', email: 'alice@example.com', password: 'password123') }
+  let!(:bob) { User.create!(name: 'Bob Smith', email: 'bob@example.com', password: 'password123') }
+  let!(:charlie) { User.create!(name: 'Charlie Brown', email: 'charlie@example.com', password: 'password123') }
+  
+  let(:alice_token) { JwtService.encode(user_id: alice.id) }
+  let(:bob_token) { JwtService.encode(user_id: bob.id) }
+  let(:auth_headers) { { 'Authorization' => "Bearer #{alice_token}" } }
 
   # Set up initial follow relationships
   before do
@@ -12,13 +16,13 @@ RSpec.describe Api::V1::FollowsController, type: :request do
     bob.follow(charlie)
   end
 
-  describe 'POST /api/v1/users/:user_id/follow/:id' do
+  describe 'POST /api/v1/follow/:id' do
     context 'when following a new user' do
       it 'creates a new follow relationship' do
         expect(bob.following?(alice)).to be false
 
         expect {
-          post "/api/v1/users/#{bob.id}/follow/#{alice.id}", as: :json
+          post "/api/v1/follow/#{alice.id}", headers: { 'Authorization' => "Bearer #{bob_token}" }, as: :json
         }.to change(Follow, :count).by(1)
 
         expect(response).to have_http_status(:success)
@@ -40,7 +44,7 @@ RSpec.describe Api::V1::FollowsController, type: :request do
         expect(alice.following?(bob)).to be true
 
         expect {
-          post "/api/v1/users/#{alice.id}/follow/#{bob.id}", as: :json
+          post "/api/v1/follow/#{bob.id}", headers: auth_headers, as: :json
         }.not_to change(Follow, :count)
 
         expect(response).to have_http_status(:success)
@@ -53,7 +57,7 @@ RSpec.describe Api::V1::FollowsController, type: :request do
     context 'when trying to follow yourself' do
       it 'prevents self-following' do
         expect {
-          post "/api/v1/users/#{alice.id}/follow/#{alice.id}", as: :json
+          post "/api/v1/follow/#{alice.id}", headers: auth_headers, as: :json
         }.not_to change(Follow, :count)
 
         expect(response).to have_http_status(:unprocessable_entity)
@@ -64,7 +68,7 @@ RSpec.describe Api::V1::FollowsController, type: :request do
     end
 
     it 'returns current following list after follow action' do
-      post "/api/v1/users/#{bob.id}/follow/#{alice.id}", as: :json
+      post "/api/v1/follow/#{alice.id}", headers: { 'Authorization' => "Bearer #{bob_token}" }, as: :json
 
       expect(response).to have_http_status(:success)
       response_data = JSON.parse(response.body)
@@ -78,16 +82,16 @@ RSpec.describe Api::V1::FollowsController, type: :request do
     end
 
     context 'with non-existent user' do
-      it 'returns 404 for non-existent user' do
-        post "/api/v1/users/99999/follow/#{bob.id}", as: :json
+      it 'returns 401 for unauthorized request' do
+        post "/api/v1/follow/#{bob.id}", headers: {}, as: :json
 
-        expect(response).to have_http_status(:not_found)
+        expect(response).to have_http_status(:unauthorized)
         response_data = JSON.parse(response.body)
-        expect(response_data['error']).to eq('User not found')
+        expect(response_data['error']).to eq('Unauthorized')
       end
 
       it 'returns 404 for non-existent target user' do
-        post "/api/v1/users/#{alice.id}/follow/99999", as: :json
+        post "/api/v1/follow/99999", headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:not_found)
         response_data = JSON.parse(response.body)
@@ -96,13 +100,13 @@ RSpec.describe Api::V1::FollowsController, type: :request do
     end
   end
 
-  describe 'DELETE /api/v1/users/:user_id/follow/:id' do
+  describe 'DELETE /api/v1/follow/:id' do
     context 'when unfollowing a followed user' do
       it 'removes the follow relationship' do
         expect(alice.following?(bob)).to be true
 
         expect {
-          delete "/api/v1/users/#{alice.id}/follow/#{bob.id}", as: :json
+          delete "/api/v1/follow/#{bob.id}", headers: auth_headers, as: :json
         }.to change(Follow, :count).by(-1)
 
         expect(response).to have_http_status(:success)
@@ -124,7 +128,7 @@ RSpec.describe Api::V1::FollowsController, type: :request do
         expect(charlie.following?(alice)).to be false
 
         expect {
-          delete "/api/v1/users/#{charlie.id}/follow/#{alice.id}", as: :json
+          delete "/api/v1/follow/#{alice.id}", headers: { 'Authorization' => "Bearer #{JwtService.encode(user_id: charlie.id)}" }, as: :json
         }.not_to change(Follow, :count)
 
         expect(response).to have_http_status(:success)
@@ -135,7 +139,7 @@ RSpec.describe Api::V1::FollowsController, type: :request do
     end
 
     it 'returns updated following list after unfollow action' do
-      delete "/api/v1/users/#{alice.id}/follow/#{bob.id}", as: :json
+      delete "/api/v1/follow/#{bob.id}", headers: auth_headers, as: :json
 
       expect(response).to have_http_status(:success)
       response_data = JSON.parse(response.body)

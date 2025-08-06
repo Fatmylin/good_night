@@ -6,12 +6,17 @@ class Api::V1::FollowsController < Api::V1::BaseController
       @message = "Already following this user"
       @following = current_user.following
     elsif current_user == @target_user
-      render json: { error: "Cannot follow yourself" }, status: :unprocessable_entity
+      return render json: { error: "Cannot follow yourself" }, status: :unprocessable_entity
     else
       current_user.follow(@target_user)
       @message = "Successfully followed user"
       @following = current_user.following
     end
+
+    render json: {
+      message: @message,
+      following: @following
+    }
   end
 
   def unfollow
@@ -23,6 +28,11 @@ class Api::V1::FollowsController < Api::V1::BaseController
       @message = "Not following this user"
       @following = current_user.following
     end
+
+    render json: {
+      message: @message,
+      following: @following
+    }
   end
 
   private

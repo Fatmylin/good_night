@@ -14,9 +14,9 @@ RSpec.describe User, type: :model do
   end
 
   describe 'methods' do
-    let(:alice) { User.create!(name: 'Alice Johnson') }
-    let(:bob) { User.create!(name: 'Bob Smith') }
-    let(:charlie) { User.create!(name: 'Charlie Brown') }
+    let(:alice) { User.create!(name: 'Alice Johnson', email: 'alice@example.com', password: 'password123') }
+    let(:bob) { User.create!(name: 'Bob Smith', email: 'bob@example.com', password: 'password123') }
+    let(:charlie) { User.create!(name: 'Charlie Brown', email: 'charlie@example.com', password: 'password123') }
 
     describe '#follow' do
       it 'should follow another user' do

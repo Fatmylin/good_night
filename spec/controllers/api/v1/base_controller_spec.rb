@@ -13,7 +13,7 @@ RSpec.describe Api::V1::BaseController, type: :request do
 
     context 'with valid JWT token' do
       it 'allows authenticated requests' do
-        post '/api/v1/clock_in',
+        post "/api/v1/clock_in",
              headers: { 'Authorization' => "Bearer #{token}" },
              as: :json
 
@@ -24,7 +24,7 @@ RSpec.describe Api::V1::BaseController, type: :request do
 
     context 'without JWT token' do
       it 'returns unauthorized error' do
-        post '/api/v1/clock_in', as: :json
+        post "/api/v1/clock_in", as: :json
 
         expect(response).to have_http_status(:unauthorized)
         expect(JSON.parse(response.body)['error']).to eq('Unauthorized')
@@ -33,7 +33,7 @@ RSpec.describe Api::V1::BaseController, type: :request do
 
     context 'with invalid JWT token' do
       it 'returns unauthorized error' do
-        post '/api/v1/clock_in',
+        post "/api/v1/clock_in",
              headers: { 'Authorization' => 'Bearer invalid_token' },
              as: :json
 
@@ -46,7 +46,7 @@ RSpec.describe Api::V1::BaseController, type: :request do
       it 'returns unauthorized error' do
         expired_token = JwtService.encode({ user_id: user.id }, 1.hour.ago)
 
-        post '/api/v1/clock_in',
+        post "/api/v1/clock_in",
              headers: { 'Authorization' => "Bearer #{expired_token}" },
              as: :json
 

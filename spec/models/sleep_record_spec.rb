@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe SleepRecord, type: :model do
-  let(:user) { User.create!(name: 'Test User') }
+  let(:user) { User.create!(name: 'Test User', email: 'test@example.com', password: 'password123') }
 
   describe 'validations' do
     it { should validate_presence_of(:clock_in) }
@@ -74,7 +74,7 @@ RSpec.describe SleepRecord, type: :model do
     end
 
     describe '.for_users' do
-      let(:other_user) { User.create!(name: 'Other User') }
+      let(:other_user) { User.create!(name: 'Other User', email: 'other@example.com', password: 'password123') }
       let!(:other_user_record) { SleepRecord.create!(user: other_user, clock_in: Time.current) }
 
       it 'returns records for specified users' do

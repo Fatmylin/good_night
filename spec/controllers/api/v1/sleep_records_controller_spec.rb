@@ -1,9 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe Api::V1::SleepRecordsController, type: :request do
-  let!(:alice) { User.create!(name: 'Alice Johnson') }
-  let!(:bob) { User.create!(name: 'Bob Smith') }
-  let!(:charlie) { User.create!(name: 'Charlie Brown') }
+  let!(:alice) { User.create!(name: 'Alice Johnson', email: 'alice@example.com', password: 'password123') }
+  let!(:bob) { User.create!(name: 'Bob Smith', email: 'bob@example.com', password: 'password123') }
+  let!(:charlie) { User.create!(name: 'Charlie Brown', email: 'charlie@example.com', password: 'password123') }
+  
+  let(:alice_token) { JwtService.encode(user_id: alice.id) }
+  let(:bob_token) { JwtService.encode(user_id: bob.id) }
+  let(:auth_headers) { { 'Authorization' => "Bearer #{alice_token}" } }
 
   # Set up some test data
   before do
@@ -31,13 +35,13 @@ RSpec.describe Api::V1::SleepRecordsController, type: :request do
     )
   end
 
-  describe 'POST /api/v1/users/:user_id/clock_in' do
+  describe 'POST /api/v1/clock_in' do
     context 'for user with no existing sleep records' do
-      let(:new_user) { User.create!(name: 'New User') }
+      let(:new_user) { User.create!(name: 'New User', email: 'newuser@example.com', password: 'password123') }
 
       it 'creates a new sleep record' do
         expect {
-          post "/api/v1/users/#{new_user.id}/clock_in", as: :json
+          post "/api/v1/clock_in", headers: { 'Authorization' => "Bearer #{JwtService.encode(user_id: new_user.id)}" }, as: :json
         }.to change(SleepRecord, :count).by(1)
 
         expect(response).to have_http_status(:success)
@@ -55,7 +59,7 @@ RSpec.describe Api::V1::SleepRecordsController, type: :request do
     context 'for user with existing in-progress sleep record' do
       it 'clocks out the existing record' do
         expect {
-          post "/api/v1/users/#{bob.id}/clock_in", as: :json
+          post "/api/v1/clock_in", headers: { 'Authorization' => "Bearer #{bob_token}" }, as: :json
         }.not_to change(SleepRecord, :count)
 
         expect(response).to have_http_status(:success)
@@ -74,7 +78,7 @@ RSpec.describe Api::V1::SleepRecordsController, type: :request do
       SleepRecord.create!(user: alice, clock_in: 2.days.ago, clock_out: 2.days.ago + 7.hours)
       SleepRecord.create!(user: alice, clock_in: 1.day.ago, clock_out: 1.day.ago + 8.hours)
 
-      post "/api/v1/users/#{alice.id}/clock_in", as: :json
+      post "/api/v1/clock_in", headers: auth_headers, as: :json
 
       expect(response).to have_http_status(:success)
       response_data = JSON.parse(response.body)
@@ -84,18 +88,16 @@ RSpec.describe Api::V1::SleepRecordsController, type: :request do
       expect(created_times).to eq(created_times.sort)
     end
 
-    it 'returns 404 for non-existent user' do
-      post '/api/v1/users/99999/clock_in', as: :json
+    it 'returns unauthorized without valid token' do
+      post '/api/v1/clock_in', as: :json
 
-      expect(response).to have_http_status(:not_found)
-      response_data = JSON.parse(response.body)
-      expect(response_data['error']).to eq('User not found')
+      expect(response).to have_http_status(:unauthorized)
     end
   end
 
-  describe 'GET /api/v1/users/:user_id/following_sleep_records' do
+  describe 'GET /api/v1/following_sleep_records' do
     it 'returns following users sleep records from last week' do
-      get "/api/v1/users/#{alice.id}/following_sleep_records", as: :json
+      get "/api/v1/following_sleep_records", headers: auth_headers, as: :json
 
       expect(response).to have_http_status(:success)
       response_data = JSON.parse(response.body)
@@ -113,7 +115,7 @@ RSpec.describe Api::V1::SleepRecordsController, type: :request do
     end
 
     it 'sorts following sleep records by duration descending' do
-      get "/api/v1/users/#{alice.id}/following_sleep_records", as: :json
+      get "/api/v1/following_sleep_records", headers: auth_headers, as: :json
 
       expect(response).to have_http_status(:success)
       response_data = JSON.parse(response.body)
@@ -124,19 +126,17 @@ RSpec.describe Api::V1::SleepRecordsController, type: :request do
     end
 
     it 'returns empty array if user follows no one' do
-      get "/api/v1/users/#{charlie.id}/following_sleep_records", as: :json
+      get "/api/v1/following_sleep_records", headers: { 'Authorization' => "Bearer #{JwtService.encode(user_id: charlie.id)}" }, as: :json
 
       expect(response).to have_http_status(:success)
       response_data = JSON.parse(response.body)
       expect(response_data).to eq([])
     end
 
-    it 'returns 404 for non-existent user' do
-      get '/api/v1/users/99999/following_sleep_records', as: :json
+    it 'returns unauthorized without valid token' do
+      get '/api/v1/following_sleep_records', as: :json
 
-      expect(response).to have_http_status(:not_found)
-      response_data = JSON.parse(response.body)
-      expect(response_data['error']).to eq('User not found')
+      expect(response).to have_http_status(:unauthorized)
     end
   end
 end
