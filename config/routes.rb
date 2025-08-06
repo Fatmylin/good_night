@@ -9,16 +9,16 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       # Authentication
-      post 'signup', to: 'auth#signup'
-      post 'login', to: 'auth#login'
-      
+      post "signup", to: "auth#signup"
+      post "login", to: "auth#login"
+
       # Sleep records
-      post 'clock_in', to: 'sleep_records#clock_in'
-      get 'following_sleep_records', to: 'sleep_records#following_sleep_records'
-      
+      post "clock_in", to: "sleep_records#clock_in"
+      get "following_sleep_records", to: "sleep_records#following_sleep_records"
+
       # Follow/Unfollow
-      post 'follow/:id', to: 'follows#follow'
-      delete 'follow/:id', to: 'follows#unfollow'
+      post "follow/:id", to: "follows#follow"
+      delete "follow/:id", to: "follows#unfollow"
     end
   end
 

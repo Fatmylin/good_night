@@ -44,7 +44,7 @@ RSpec.describe User, type: :model do
       it 'should unfollow user' do
         alice.follow(bob)
         expect(alice.following?(bob)).to be true
-        
+
         alice.unfollow(bob)
         expect(alice.following?(bob)).to be false
       end
@@ -54,7 +54,7 @@ RSpec.describe User, type: :model do
       it 'should check if following user' do
         alice.follow(bob)
         alice.follow(charlie)
-        
+
         expect(alice.following?(bob)).to be true
         expect(alice.following?(charlie)).to be true
         expect(alice.following?(alice)).to be false

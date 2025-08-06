@@ -14,7 +14,7 @@ RSpec.describe SleepRecord, type: :model do
         clock_in: clock_in_time,
         clock_out: clock_in_time - 1.hour
       )
-      
+
       expect(sleep_record).to be_invalid
       expect(sleep_record.errors[:clock_out]).to include('must be after clock in time')
     end
@@ -78,8 +78,8 @@ RSpec.describe SleepRecord, type: :model do
       let!(:other_user_record) { SleepRecord.create!(user: other_user, clock_in: Time.current) }
 
       it 'returns records for specified users' do
-        expect(SleepRecord.for_users([user.id])).to include(completed_record, in_progress_record)
-        expect(SleepRecord.for_users([user.id])).not_to include(other_user_record)
+        expect(SleepRecord.for_users([ user.id ])).to include(completed_record, in_progress_record)
+        expect(SleepRecord.for_users([ user.id ])).not_to include(other_user_record)
       end
     end
   end
@@ -89,13 +89,13 @@ RSpec.describe SleepRecord, type: :model do
       it 'calculates duration correctly for completed records' do
         clock_in_time = Time.current
         clock_out_time = clock_in_time + 8.hours
-        
+
         sleep_record = SleepRecord.new(
           user: user,
           clock_in: clock_in_time,
           clock_out: clock_out_time
         )
-        
+
         expect(sleep_record.duration_in_seconds).to eq(28800) # 8 hours * 3600 seconds
       end
 
@@ -109,13 +109,13 @@ RSpec.describe SleepRecord, type: :model do
       it 'calculates duration in hours correctly' do
         clock_in_time = Time.current
         clock_out_time = clock_in_time + 8.hours
-        
+
         sleep_record = SleepRecord.new(
           user: user,
           clock_in: clock_in_time,
           clock_out: clock_out_time
         )
-        
+
         expect(sleep_record.duration_in_hours).to eq(8.0)
       end
 

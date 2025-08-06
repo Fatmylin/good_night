@@ -1,5 +1,5 @@
 class Api::V1::FollowsController < Api::V1::BaseController
-  before_action :set_target_user, only: [:follow, :unfollow]
+  before_action :set_target_user, only: [ :follow, :unfollow ]
 
   def follow
     if current_user.following?(@target_user)

@@ -7,7 +7,7 @@ RSpec.describe Follow, type: :model do
 
   describe 'validations' do
     subject { Follow.new(follower: alice, followed: bob) }
-    
+
     it { should validate_presence_of(:follower_id) }
     it { should validate_presence_of(:followed_id) }
     it { should validate_uniqueness_of(:follower_id).scoped_to(:followed_id) }
@@ -40,10 +40,10 @@ RSpec.describe Follow, type: :model do
     it 'should allow same user to be followed by different users' do
       follow1 = Follow.new(follower: alice, followed: charlie)
       follow2 = Follow.new(follower: bob, followed: charlie)
-      
+
       expect(follow1).to be_valid
       expect(follow2).to be_valid
-      
+
       follow1.save!
       expect(follow2).to be_valid
     end
@@ -51,10 +51,10 @@ RSpec.describe Follow, type: :model do
     it 'should allow user to follow multiple users' do
       follow1 = Follow.new(follower: alice, followed: bob)
       follow2 = Follow.new(follower: alice, followed: charlie)
-      
+
       expect(follow1).to be_valid
       expect(follow2).to be_valid
-      
+
       follow1.save!
       expect(follow2).to be_valid
     end
@@ -63,7 +63,7 @@ RSpec.describe Follow, type: :model do
   describe 'referential integrity' do
     it 'should maintain proper associations' do
       follow = Follow.create!(follower: alice, followed: bob)
-      
+
       expect(follow.follower).to eq(alice)
       expect(follow.followed).to eq(bob)
       expect(follow.follower).to be_a(User)
@@ -72,7 +72,7 @@ RSpec.describe Follow, type: :model do
 
     it 'should enforce unique constraint at database level' do
       Follow.create!(follower: alice, followed: bob)
-      
+
       expect {
         Follow.create!(follower: alice, followed: bob)
       }.to raise_error(ActiveRecord::RecordInvalid)
