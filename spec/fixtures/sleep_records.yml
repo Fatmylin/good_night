@@ -1,0 +1,26 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+alice_sleep_one:
+  user: alice
+  clock_in: <%= 2.days.ago %>
+  clock_out: <%= 2.days.ago + 8.hours %>
+
+alice_sleep_two:
+  user: alice
+  clock_in: <%= 1.day.ago %>
+  clock_out: <%= 1.day.ago + 7.hours %>
+
+bob_sleep_one:
+  user: bob
+  clock_in: <%= 3.days.ago %>
+  clock_out: <%= 3.days.ago + 9.hours %>
+
+bob_sleep_ongoing:
+  user: bob
+  clock_in: <%= 1.hour.ago %>
+  clock_out: 
+
+charlie_sleep_one:
+  user: charlie
+  clock_in: <%= 4.days.ago %>
+  clock_out: <%= 4.days.ago + 6.hours %>

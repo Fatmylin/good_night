@@ -1,0 +1,10 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+alice:
+  name: Alice Johnson
+
+bob:
+  name: Bob Smith
+
+charlie:
+  name: Charlie Brown

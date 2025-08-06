@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+alice_follows_bob:
+  follower: alice
+  followed: bob
+
+alice_follows_charlie:
+  follower: alice
+  followed: charlie
+
+bob_follows_charlie:
+  follower: bob
+  followed: charlie
