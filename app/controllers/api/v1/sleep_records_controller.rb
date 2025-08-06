@@ -1,4 +1,4 @@
-class Api::V1::SleepRecordsController < ApplicationController
+class Api::V1::SleepRecordsController < Api::V1::BaseController
   before_action :set_user
   
   def clock_in

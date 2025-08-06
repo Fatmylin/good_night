@@ -1,4 +1,4 @@
-class Api::V1::FollowsController < ApplicationController
+class Api::V1::FollowsController < Api::V1::BaseController
   before_action :set_user
   before_action :set_target_user, only: [:follow, :unfollow]
 
