@@ -7,22 +7,52 @@ RSpec.describe Api::V1::BaseController, type: :request do
     end
   end
 
-  describe 'CSRF protection behavior' do
-    let!(:user) { User.create!(name: 'Test User') }
-
-    it 'allows API requests without CSRF token through inherited controllers' do
-      # Test that controllers inheriting from BaseController work without CSRF token
-      post "/api/v1/users/#{user.id}/clock_in", as: :json
-      
-      expect(response).to have_http_status(:success)
-      expect(JSON.parse(response.body)['message']).to eq('Clocked in')
+  describe 'JWT authentication' do
+    let!(:user) { User.create!(name: 'Test User', email: 'test@example.com', password: 'password') }
+    let(:token) { JwtService.encode(user_id: user.id) }
+    
+    context 'with valid JWT token' do
+      it 'allows authenticated requests' do
+        post '/api/v1/clock_in', 
+             headers: { 'Authorization' => "Bearer #{token}" }, 
+             as: :json
+        
+        expect(response).to have_http_status(:success)
+        expect(JSON.parse(response.body)['message']).to eq('Clocked in')
+      end
     end
-
-    it 'does not raise InvalidAuthenticityToken error' do
-      # This verifies that protect_from_forgery with: :null_session is working
-      expect {
-        post "/api/v1/users/#{user.id}/clock_in", as: :json
-      }.not_to raise_error
+    
+    context 'without JWT token' do
+      it 'returns unauthorized error' do
+        post '/api/v1/clock_in', as: :json
+        
+        expect(response).to have_http_status(:unauthorized)
+        expect(JSON.parse(response.body)['error']).to eq('Unauthorized')
+      end
+    end
+    
+    context 'with invalid JWT token' do
+      it 'returns unauthorized error' do
+        post '/api/v1/clock_in', 
+             headers: { 'Authorization' => 'Bearer invalid_token' }, 
+             as: :json
+        
+        expect(response).to have_http_status(:unauthorized)
+        expect(JSON.parse(response.body)['error']).to eq('Unauthorized')
+      end
+    end
+    
+    context 'with expired JWT token' do
+      it 'returns unauthorized error' do
+        expired_token = JwtService.encode({ user_id: user.id }, 1.hour.ago)
+        
+        post '/api/v1/clock_in', 
+             headers: { 'Authorization' => "Bearer #{expired_token}" }, 
+             as: :json
+        
+        expect(response).to have_http_status(:unauthorized)
+        expect(JSON.parse(response.body)['error']).to eq('Unauthorized')
+      end
     end
   end
 end

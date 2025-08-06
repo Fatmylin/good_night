@@ -4,6 +4,7 @@ A Rails 8 REST API application that allows users to track their sleep patterns a
 
 ## Features
 
+✅ **JWT Authentication**: Secure user registration and login with JSON Web Tokens
 ✅ **Clock In/Out System**: Users can clock in when going to bed and clock out when waking up
 ✅ **Social Following**: Users can follow and unfollow other users  
 ✅ **Sleep Records Viewing**: See sleep records from followed users from the past week, sorted by duration
@@ -13,12 +14,19 @@ A Rails 8 REST API application that allows users to track their sleep patterns a
 
 ## API Endpoints
 
+### Authentication (Public)
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/v1/users/:user_id/clock_in` | Clock in/out for sleep tracking |
-| `POST` | `/api/v1/users/:user_id/follow/:id` | Follow another user |
-| `DELETE` | `/api/v1/users/:user_id/follow/:id` | Unfollow a user |
-| `GET` | `/api/v1/users/:user_id/following_sleep_records` | Get following users' sleep records |
+| `POST` | `/api/v1/signup` | Create new user account |
+| `POST` | `/api/v1/login` | Authenticate and get JWT token |
+
+### Protected Endpoints (Requires JWT Token)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/clock_in` | Clock in/out for sleep tracking |
+| `POST` | `/api/v1/follow/:id` | Follow another user |
+| `DELETE` | `/api/v1/follow/:id` | Unfollow a user |
+| `GET` | `/api/v1/following_sleep_records` | Get following users' sleep records |
 
 ## Quick Start
 
@@ -63,31 +71,59 @@ All 46 tests should pass, covering models, controllers, and API functionality.
 
 ## Usage Examples
 
-### 1. Clock In for Sleep
+### 1. Register a New User
 ```bash
-curl -X POST http://localhost:3000/api/v1/users/1/clock_in
+curl -X POST http://localhost:3000/api/v1/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user": {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "password": "password123",
+      "password_confirmation": "password123"
+    }
+  }'
 ```
 
-### 2. Follow Another User
+### 2. Login and Get JWT Token
 ```bash
-curl -X POST http://localhost:3000/api/v1/users/1/follow/2
+curl -X POST http://localhost:3000/api/v1/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@example.com",
+    "password": "password123"
+  }'
 ```
 
-### 3. Get Friends' Sleep Records
+### 3. Clock In for Sleep (Authenticated)
 ```bash
-curl http://localhost:3000/api/v1/users/1/following_sleep_records
+curl -X POST http://localhost:3000/api/v1/clock_in \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+### 4. Follow Another User (Authenticated)
+```bash
+curl -X POST http://localhost:3000/api/v1/follow/2 \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+### 5. Get Friends' Sleep Records (Authenticated)
+```bash
+curl http://localhost:3000/api/v1/following_sleep_records \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 ## Database Schema
 
 ### Tables
-- **users**: `id`, `name`, `created_at`, `updated_at`
+- **users**: `id`, `name`, `email`, `password_digest`, `created_at`, `updated_at`
 - **sleep_records**: `id`, `user_id`, `clock_in`, `clock_out`, `created_at`, `updated_at`
 - **follows**: `id`, `follower_id`, `followed_id`, `created_at`, `updated_at`
 
 ### Indexes
 - Primary keys on all tables
 - Foreign key indexes (automatic)
+- `users(email)` - unique index for authentication
 - `sleep_records(created_at)` - for time-based queries
 - `sleep_records(clock_in)` - for sleep time queries  
 - `follows(follower_id, followed_id)` - unique composite index
@@ -140,18 +176,22 @@ Coverage includes:
 
 - **Framework**: Rails 8.0.2
 - **Database**: SQLite3 (development/test), configurable for production
+- **Authentication**: JWT with bcrypt password hashing
 - **Caching**: solid_cache (Redis-compatible)
-- **Testing**: Rails built-in test framework
+- **Testing**: RSpec with comprehensive test coverage
 - **Web Server**: Puma
 
 ## Future Enhancements
 
-- User authentication and authorization
+- Advanced user roles and permissions
 - Pagination for large datasets
 - WebSocket support for real-time updates  
 - Sleep analytics and statistics
 - Rate limiting and API throttling
 - Database read replicas for scaling
+- Password reset functionality
+- Social features (comments, likes)
+- Mobile app integration
 
 ## Contributing
 
