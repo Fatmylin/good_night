@@ -5,11 +5,17 @@ A Rails 8 REST API application that allows users to track their sleep patterns a
 ## Features
 
 ✅ **JWT Authentication**: Secure user registration and login with JSON Web Tokens
+
 ✅ **Clock In/Out System**: Users can clock in when going to bed and clock out when waking up
+
 ✅ **Social Following**: Users can follow and unfollow other users  
+
 ✅ **Sleep Records Viewing**: See sleep records from followed users from the past week, sorted by duration
+
 ✅ **Performance Optimized**: Includes caching, database indexing, and query optimization
+
 ✅ **Comprehensive Tests**: Full test coverage for all APIs and models
+
 ✅ **Documentation**: Complete API documentation and performance strategy
 
 ## API Endpoints
