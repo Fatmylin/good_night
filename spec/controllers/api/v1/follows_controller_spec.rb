@@ -4,7 +4,7 @@ RSpec.describe Api::V1::FollowsController, type: :request do
   let!(:alice) { User.create!(name: 'Alice Johnson', email: 'alice@example.com', password: 'password123') }
   let!(:bob) { User.create!(name: 'Bob Smith', email: 'bob@example.com', password: 'password123') }
   let!(:charlie) { User.create!(name: 'Charlie Brown', email: 'charlie@example.com', password: 'password123') }
-  
+
   let(:alice_token) { JwtService.encode(user_id: alice.id) }
   let(:bob_token) { JwtService.encode(user_id: bob.id) }
   let(:auth_headers) { { 'Authorization' => "Bearer #{alice_token}" } }

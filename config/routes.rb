@@ -13,10 +13,10 @@ Rails.application.routes.draw do
       post "login", to: "auth#login"
 
       # Sleep records
-      resources :sleep_records, only: [:create, :index]
+      resources :sleep_records, only: [ :create, :index ]
 
       # Follows
-      resources :follows, only: [:create, :destroy]
+      resources :follows, only: [ :create, :destroy ]
     end
   end
 
