@@ -1,5 +1,5 @@
 class Api::V1::SleepRecordsController < Api::V1::BaseController
-  def clock_in
+  def create
     # Check if user has an in-progress sleep record
     in_progress_record = current_user.sleep_records.in_progress.first
 
@@ -18,7 +18,7 @@ class Api::V1::SleepRecordsController < Api::V1::BaseController
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
-  def following_sleep_records
+  def index
     # Use caching for expensive operations
     cache_key = "user_#{current_user.id}_following_sleep_records_#{Date.current}"
 

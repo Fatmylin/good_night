@@ -13,12 +13,10 @@ Rails.application.routes.draw do
       post "login", to: "auth#login"
 
       # Sleep records
-      post "clock_in", to: "sleep_records#clock_in"
-      get "following_sleep_records", to: "sleep_records#following_sleep_records"
+      resources :sleep_records, only: [:create, :index]
 
-      # Follow/Unfollow
-      post "follow/:id", to: "follows#follow"
-      delete "follow/:id", to: "follows#unfollow"
+      # Follows
+      resources :follows, only: [:create, :destroy]
     end
   end
 

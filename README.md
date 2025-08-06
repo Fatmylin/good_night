@@ -158,7 +158,7 @@ curl -X POST http://localhost:3000/api/v1/login \
 #### 3. Clock In/Out
 Track sleep sessions by clocking in when going to bed and clocking out when waking up.
 
-**Endpoint:** `POST /api/v1/clock_in`
+**Endpoint:** `POST /api/v1/sleep_records`
 
 **Description:** 
 - If user has no active sleep session: Creates a new sleep record with clock_in time
@@ -206,23 +206,23 @@ Content-Type: application/json
 **Example Usage:**
 ```bash
 # Clock in (requires authentication)
-curl -X POST http://localhost:3000/api/v1/clock_in \
+curl -X POST http://localhost:3000/api/v1/sleep_records \
   -H "Authorization: Bearer <your_jwt_token>"
 
 # Clock out (same endpoint - toggles based on current state)
-curl -X POST http://localhost:3000/api/v1/clock_in \
+curl -X POST http://localhost:3000/api/v1/sleep_records \
   -H "Authorization: Bearer <your_jwt_token>"
 ```
 
 #### 4. Follow User
 Create a follow relationship between two users.
 
-**Endpoint:** `POST /api/v1/follow/:id`
+**Endpoint:** `POST /api/v1/follows`
 
-**Description:** Current authenticated user follows the user with `id`.
+**Description:** Current authenticated user follows the specified user.
 
 **Parameters:**
-- `id` (path parameter, required): The ID of the user to be followed
+- `id` (body parameter, required): The ID of the user to be followed
 
 **Success Response:**
 ```http
@@ -273,14 +273,16 @@ Content-Type: application/json
 **Example Usage:**
 ```bash
 # Follow user 2 (requires authentication)
-curl -X POST http://localhost:3000/api/v1/follow/2 \
-  -H "Authorization: Bearer <your_jwt_token>"
+curl -X POST http://localhost:3000/api/v1/follows \
+  -H "Authorization: Bearer <your_jwt_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"id": 2}'
 ```
 
 #### 5. Unfollow User
 Remove a follow relationship between two users.
 
-**Endpoint:** `DELETE /api/v1/follow/:id`
+**Endpoint:** `DELETE /api/v1/follows/:id`
 
 **Description:** Current authenticated user unfollows the user with `id`.
 
@@ -317,14 +319,14 @@ Content-Type: application/json
 **Example Usage:**
 ```bash
 # Unfollow user 2 (requires authentication)
-curl -X DELETE http://localhost:3000/api/v1/follow/2 \
+curl -X DELETE http://localhost:3000/api/v1/follows/2 \
   -H "Authorization: Bearer <your_jwt_token>"
 ```
 
 #### 6. Get Following Users' Sleep Records
 Retrieve sleep records from all users that the current user follows, from the previous week, sorted by sleep duration.
 
-**Endpoint:** `GET /api/v1/following_sleep_records`
+**Endpoint:** `GET /api/v1/sleep_records`
 
 **Description:** Returns completed sleep records from followed users in the past week, ordered by duration (longest sleep first). User is identified from the JWT token.
 
@@ -380,7 +382,7 @@ Content-Type: application/json
 **Example Usage:**
 ```bash
 # Get sleep records from users that current user follows (requires authentication)
-curl http://localhost:3000/api/v1/following_sleep_records \
+curl http://localhost:3000/api/v1/sleep_records \
   -H "Authorization: Bearer <your_jwt_token>"
 ```
 
@@ -448,25 +450,27 @@ curl -X POST http://localhost:3000/api/v1/login \
 
 3. **Create sleep session:**
 ```bash
-curl -X POST http://localhost:3000/api/v1/clock_in \
+curl -X POST http://localhost:3000/api/v1/sleep_records \
   -H "Authorization: Bearer <your_jwt_token>"
 ```
 
 4. **Follow another user:**
 ```bash
-curl -X POST http://localhost:3000/api/v1/follow/2 \
-  -H "Authorization: Bearer <your_jwt_token>"
+curl -X POST http://localhost:3000/api/v1/follows \
+  -H "Authorization: Bearer <your_jwt_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"id": 2}'
 ```
 
 5. **Complete sleep session:**
 ```bash
-curl -X POST http://localhost:3000/api/v1/clock_in \
+curl -X POST http://localhost:3000/api/v1/sleep_records \
   -H "Authorization: Bearer <your_jwt_token>"
 ```
 
 6. **View friends' sleep patterns:**
 ```bash
-curl http://localhost:3000/api/v1/following_sleep_records \
+curl http://localhost:3000/api/v1/sleep_records \
   -H "Authorization: Bearer <your_jwt_token>"
 ```
 
